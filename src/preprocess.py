@@ -23,7 +23,10 @@ def extract_floor(floor_info: str) -> int:
     Args:
         floor_info (str): 층수 정보
     """
-    # TODO
+    splited_floor = floor_info.split()
+    floor_str = splited_floor[0]
+
+    return int(floor_str) if floor_str.isnumeric() else 0
 
 
 def floor_extractor(df: pd.DataFrame, col: str) -> pd.DataFrame:
@@ -48,15 +51,17 @@ def floor_extractor(df: pd.DataFrame, col: str) -> pd.DataFrame:
 # 3. 범주형 변수(CAT_FEATURES)는 타겟 인코딩 적용 (from category_encoders import TargetEncoder)
 preprocess_pipeline = ColumnTransformer(
     transformers=[
-        # TODO,
+        ("sqrt_transformer", FunctionTransformer(np.sqrt), ["size"]),
         (
             "floor_extractor",
             FunctionTransformer(floor_extractor, kw_args={"col": "floor"}),
             ["floor"],
         ),
-        # TODO,
+        ("target_encoder", TargetEncoder(), CAT_FEATURES),
     ],
     remainder="passthrough",
-    verbose_feature_names_out=False,
+    verbose_feature_names_out=False,  # 원래 이름대로 나오게 만드는 line
 )
-preprocess_pipeline.set_output(transform="pandas")
+preprocess_pipeline.set_output(
+    transform="pandas"
+)  # transformer는 output이 모두 넘파이로 나오기에, 이걸 다시 판다스로 만드는 과정을 취한다
